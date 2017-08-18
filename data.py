@@ -52,7 +52,7 @@ def insert_drone_dataset():
 	cur.close()
 	conn.close()
 
-def get_steps(batch_size):
+def get_steps_per_epoch(batch_size):
 	conn, cur = get_db_connection()
 	cur.execute("select count(*) from patch_dir inner join ngii_dir on patch_dir.name = ngii_dir.name where ngii_dir.purpose='training';")
 	rows = cur.fetchall()
@@ -103,8 +103,6 @@ def insert_patch(name, x_data, y_data, y_label):
 	conn.commit()
 	cur.close()
 	conn.close()
-
-
 
 if __name__=='__main__':
 	insert_ngii_dataset()
