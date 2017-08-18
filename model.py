@@ -109,7 +109,7 @@ class Deconv:
         steps = data.get_steps(8)
 
         with tf.Session() as sess:
-            train_writer = tf.summary.FileWriter('/home/lsmjn/Drone-Deconv/tb/%s' % self.model_name, sess.graph)
+            train_writer = tf.summary.FileWriter('/media/lsmjn/56fcc20e-a0ee-45e0-8df1-bf8b2e9a43b2/tb/%s' % self.model_name, sess.graph)
 
             coord = tf.train.Coordinator()
             threads = tf.train.start_queue_runners(sess=sess, coord=coord)
@@ -128,6 +128,6 @@ class Deconv:
             # Stop the threads
             coord.request_stop()
             coord.join(threads)
-            save_path = saver.save(sess, "trained_model/%s/Drone_CNN.ckpt" % self.model_name)
+            save_path = saver.save(sess, "/media/lsmjn/56fcc20e-a0ee-45e0-8df1-bf8b2e9a43b2/trained_model/%s/Drone_CNN.ckpt" % self.model_name)
             print('Model saved in file: %s' % save_path)
             train_writer.close()
