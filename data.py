@@ -13,10 +13,12 @@ def get_db_connection():
 
 def insert_ngii_dataset():
 	ngii_dataset_training_dir = 'ngii_dataset_training'
+	ngii_dataset_validation_dir = 'ngii_dataset_validation'
 	ngii_dataset_test_dir = 'ngii_dataset_test'
 
 	conn, cur = get_db_connection()
 	dataset_training_names = os.listdir(ngii_dataset_training_dir)
+	dataset_validation_names = os.listdir(ngii_dataset_validation_dir)
 	dataset_test_names = os.listdir(ngii_dataset_test_dir)
 
 	cur.execute('delete from ngii_dir;')
@@ -25,7 +27,22 @@ def insert_ngii_dataset():
 	for name in dataset_training_names:
 		ngii_x_dir = '%s/%s/x.png' % (ngii_dataset_training_dir, name)
 		ngii_y_dir = '%s/%s/y.png' % (ngii_dataset_training_dir, name)
-		cur.execute("insert into ngii_dir values ('%s', '%s', '%s', 'training');" % (name, ngii_x_dir, ngii_y_dir))
+		try:
+			cur.execute("insert into ngii_dir values ('%s', '%s', '%s', 'training');" % (name, ngii_x_dir, ngii_y_dir))
+		except Exception as e:
+			print(e)
+			print(name)
+
+
+	for name in dataset_validation_names:
+		ngii_x_dir = '%s/%s/x.png' % (ngii_dataset_validation_dir, name)
+		ngii_y_dir = '%s/%s/y.png' % (ngii_dataset_validation_dir, name)
+		try:
+			cur.execute("insert into ngii_dir values ('%s', '%s', '%s', 'validation');" % (name, ngii_x_dir, ngii_y_dir))
+		except Exception as e:
+			print(e)
+			print(name)
+
 
 	for name in dataset_test_names:
 		ngii_x_dir = '%s/%s/x.png' % (ngii_dataset_test_dir, name)
@@ -81,7 +98,7 @@ def get_patch_all(conn, cur, purpose):
 		y_patch_filenames.append(row[1])
 	return patch_filenames, x_patch_filenames, y_patch_filenames
 
-def insert_patch(name, x_data, y_data, y_label):
+def insert_patch(name, x_data, y_data):
 	conn, cur = get_db_connection()
 
 	if len(x_data) > len(y_data):
@@ -94,11 +111,7 @@ def insert_patch(name, x_data, y_data, y_label):
 		x_patch_dir = x_data[i]
 		y_patch_dir = y_data[i]
 
-		road = 1 if y_label[i] == 'road' else 0
-		building = 1 if y_label[i] == 'building' else 0
-		otherwise = 1 if y_label[i] == 'otherwise' else 0
-
-		cur.execute("insert into patch_dir values ('%s', '%s', '%s', %r, %r, %r);" % (curr_dataset_name, x_patch_dir, y_patch_dir, building, road, otherwise))
+		cur.execute("insert into patch_dir values ('%s', '%s', '%s');" % (curr_dataset_name, x_patch_dir, y_patch_dir))
 
 	conn.commit()
 	cur.close()

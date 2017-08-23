@@ -1,16 +1,19 @@
 import tensorflow as tf
 import CNN as c
-import os
-import data
-from tqdm import tqdm
-from tensorflow.python.client import timeline
 
 class Deconv:
-    def __init__(self, model_name, x_batch, y_batch, lr=0.0001):
-        self.model_name = model_name
-        self.x_image = x_batch
-        self.y_ = y_batch
+    def __init__(self, x_batch_train, y_batch_train, x_batch_validation, y_batch_validation, lr=0.0001):
         self.lr = lr
+
+        self.am_testing = tf.placeholder(dtype=bool,shape=())
+
+        self.x_batch_train = x_batch_train
+        self.y_batch_train = y_batch_train
+        self.x_batch_validation = x_batch_validation
+        self.y_batch_validation = y_batch_validation
+
+        self.x_image = tf.cond(self.am_testing, lambda: self.x_batch_validation, lambda: self.x_batch_train)
+        self.y_ = tf.cond(self.am_testing, lambda: self.y_batch_validation, lambda: self.y_batch_train)
 
         self.expected = tf.expand_dims(self.y_, -1)
 
@@ -79,38 +82,14 @@ class Deconv:
         self.y_soft = tf.nn.softmax(self.y_conv)
 
         self.cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y_, logits=self.y_conv))
+        self.cross_entropy_valid = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y_, logits=self.y_conv))
 
         self.train_step = tf.train.AdamOptimizer(learning_rate=self.lr).minimize(self.cross_entropy)
 
-        tf.summary.image('input x_image', self.x_image, 4)
-        tf.summary.image('y_prediction', self.y_conv, 4)
-        tf.summary.image('y_GT', self.y_, 4)
-        tf.summary.image('y_pred_softmax', self.y_soft, 4)
+        #tf.summary.image('input x_image', self.x_image, 4)
+        #tf.summary.image('y_prediction', self.y_conv, 4)
+        #tf.summary.image('y_GT', self.y_, 4)
+        #tf.summary.image('y_pred_softmax', self.y_soft, 4)
         tf.summary.scalar('cross_entropy', self.cross_entropy)
-        tf.summary.scalar('learning rate', self.lr)
-
-    def train(self, batch_size, epoch):
-        saver = tf.train.Saver()
-        merged = tf.summary.merge_all()
-
-        steps = data.get_steps_per_epoch(batch_size)
-
-        with tf.Session() as sess:
-            train_writer = tf.summary.FileWriter('/media/lsmjn/56fcc20e-a0ee-45e0-8df1-bf8b2e9a43b2/tb/%s' % self.model_name, sess.graph)
-
-            coord = tf.train.Coordinator()
-            threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-
-            sess.run(tf.global_variables_initializer())
-            sess.run(tf.local_variables_initializer())
-
-            for i in range(0, epoch):
-                for j in range(0, steps):
-                    summary, _ = sess.run([merged, self.train_step])
-                train_writer.add_summary(summary, i)
-
-            coord.request_stop()
-            coord.join(threads)
-            save_path = saver.save(sess, "/media/lsmjn/56fcc20e-a0ee-45e0-8df1-bf8b2e9a43b2/trained_model/%s/Drone_CNN.ckpt" % self.model_name)
-            print('Model saved in file: %s' % save_path)
-            train_writer.close()
+        self.xe_valid_summary = tf.summary.scalar('cross_entropy_valid', self.cross_entropy_valid)
+        #tf.summary.scalar('learning rate', self.lr)
