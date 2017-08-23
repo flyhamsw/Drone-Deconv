@@ -91,5 +91,5 @@ class Deconv:
         #tf.summary.image('y_GT', self.y_, 4)
         #tf.summary.image('y_pred_softmax', self.y_soft, 4)
         tf.summary.scalar('cross_entropy', self.cross_entropy)
-        tf.summary.scalar('cross_entropy_valid', self.cross_entropy_valid)
+        self.xe_valid_summary = tf.summary.scalar('cross_entropy_valid', self.cross_entropy_valid)
         #tf.summary.scalar('learning rate', self.lr)

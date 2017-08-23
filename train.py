@@ -4,7 +4,6 @@ from pipeline import input_pipeline
 import shutil
 import os
 import data
-from tqdm import tqdm
 
 TRAINING_DATASET = 'NGII_training.tfrecords'
 VALIDATION_DATASET = 'NGII_validation.tfrecords'
@@ -14,7 +13,7 @@ NUM_EPOCHS = 20
 
 def train(d, batch_size, epoch):
     #Set directory for tensorboard and trained model
-    TB_DIR = 'tb'
+    TB_DIR = '/home/lsmjn/Drone-Deconv/tb'
     TRAINED_MODEL_DIR = 'trained_model'
     try:
         shutil.rmtree(TB_DIR)
@@ -33,21 +32,28 @@ def train(d, batch_size, epoch):
 
     #Start Training
     with tf.Session() as sess:
-        train_writer = tf.summary.FileWriter('/home/lsmjn/Drone-Deconv/tb', sess.graph)
+        train_writer = tf.summary.FileWriter(TB_DIR + '/train', sess.graph)
+        test_writer = tf.summary.FileWriter(TB_DIR + '/test')
 
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
         sess.run(tf.global_variables_initializer())
         sess.run(tf.local_variables_initializer())
+		
+        k = 0
 
         for i in range(0, epoch):
-            print('Epoch #%d' % i)
-            for j in tqdm(range(0, steps)):
-                summary, _ = sess.run([merged, d.train_step], feed_dict={d.am_testing: False})
-            sess.run(d.cross_entropy_valid, feed_dict={d.am_testing: True})
-            train_writer.add_summary(summary, i)
-
+            for j in range(0, steps):
+                if k % 100 == 0:
+                    summary, _ = sess.run([merged, d.train_step], feed_dict={d.am_testing: False})
+                    train_writer.add_summary(summary, k)
+                    summary, _ = sess.run([d.xe_valid_summary, d.cross_entropy_valid], feed_dict={d.am_testing: True})
+                    test_writer.add_summary(summary, k)
+                else:
+                    sess.run(d.train_step, feed_dict={d.am_testing: False})
+                k = k + 1
+            
         coord.request_stop()
         coord.join(threads)
         save_path = saver.save(sess, "/home/lsmjn/Drone-Deconv/trained_model/Drone_CNN.ckpt")
