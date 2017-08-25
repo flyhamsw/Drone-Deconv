@@ -7,7 +7,6 @@ import data
 
 TRAINING_DATASET = 'NGII_training.tfrecords'
 VALIDATION_DATASET = 'NGII_validation.tfrecords'
-TEST_DATASET = 'NGII_test.tfrecords'
 BATCH_SIZE = 8
 NUM_EPOCHS = 20
 
@@ -28,7 +27,7 @@ def train(d, batch_size, epoch):
     merged = tf.summary.merge_all()
 
     #Get steps per epoch
-    steps = data.get_steps_per_epoch(batch_size)
+    steps = data.get_steps_per_epoch(batch_size, 'training')
 
     #Start Training
     with tf.Session() as sess:

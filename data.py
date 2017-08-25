@@ -69,9 +69,9 @@ def insert_drone_dataset():
 	cur.close()
 	conn.close()
 
-def get_steps_per_epoch(batch_size):
+def get_steps_per_epoch(batch_size, interest_data):
 	conn, cur = get_db_connection()
-	cur.execute("select count(*) from patch_dir inner join ngii_dir on patch_dir.name = ngii_dir.name where ngii_dir.purpose='training';")
+	cur.execute("select count(*) from patch_dir inner join ngii_dir on patch_dir.name = ngii_dir.name where ngii_dir.purpose='%s';" % interest_data)
 	rows = cur.fetchall()
 	steps = int(rows[0][0]/batch_size)
 	print('%d steps / epoch' % steps)
