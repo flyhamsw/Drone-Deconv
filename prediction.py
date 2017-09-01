@@ -19,7 +19,6 @@ def predict(d, batch_size, epoch):
 
     #Start Training
     with tf.Session() as sess:
-
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
