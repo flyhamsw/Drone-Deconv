@@ -1,47 +1,38 @@
 import model
 import tensorflow as tf
-from pipeline import input_pipeline
-import shutil
-import os
-import data
 import cv2
-from tqdm import tqdm
 
-TEST_DATASET = 'NGII_test.tfrecords'
-BATCH_SIZE = 8
-NUM_EPOCHS = 1
-
-def predict(d, batch_size, epoch):
-    #Get steps per epoch
-    steps = data.get_steps_per_epoch(batch_size, 'test')
-
+def predict(d, drone_image):
     saver = tf.train.Saver()
 
     #Start Training
     with tf.Session() as sess:
-        coord = tf.train.Coordinator()
-        threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-
         sess.run(tf.global_variables_initializer())
         sess.run(tf.local_variables_initializer())
 
-        k = 0
-
+        print('Restoring Model...')
         saver.restore(sess, 'trained_model/Drone_CNN.ckpt')
 
-        for i in range(0, epoch):
-            for j in tqdm(range(0, steps)):
-                x_image, ground_truth, result = sess.run([d.x_image, d.y_, d.y_soft], feed_dict={d.am_testing: False})
-                for batch_idx in range(0, len(x_image)):
-                    cv2.imwrite('prediction_result/%d_x.png' % k, x_image[batch_idx])
-                    cv2.imwrite('prediction_result/%d_y.png' % k, ground_truth[batch_idx]*255)
-                    cv2.imwrite('prediction_result/%d_p.png' % k, result[batch_idx]*255)
-                    k = k + 1
-
-        coord.request_stop()
-        coord.join(threads)
+        print('Image Segmentation...')
+        result = sess.run(d.y_soft, feed_dict={d.am_testing: False, d.x_batch_train: [drone_image]})
+        
+        for batch_idx in range(0, len(result)):
+            print('Saving Result...')
+            cv2.imwrite('Ganghwa_p.jpg', result[batch_idx]*255)
+            
+    print('Image Segmentation Complete!')
 
 if __name__ == '__main__':
-    x_batch_test, y_batch_test = input_pipeline(TEST_DATASET, BATCH_SIZE, NUM_EPOCHS)
-    d = model.Deconv(x_batch_test, y_batch_test, x_batch_test, y_batch_test)
-    predict(d, BATCH_SIZE, NUM_EPOCHS)
+    print('Preparing Image...')
+    #drone_image = cv2.cvtColor(cv2.imread('drone_dataset/Ganghwa/DSC00076.JPG'), cv2.COLOR_BGR2RGB)
+    drone_image = cv2.imread('drone_dataset/Ganghwa/DSC00076.JPG')
+    drone_image = cv2.resize(drone_image, None, fx=0.0625, fy=0.0625, interpolation=cv2.INTER_AREA)
+    print(drone_image.shape)
+    drone_image = drone_image[0:223, 0:223]
+    
+    cv2.imwrite('Ganghwa.jpg', drone_image)
+    
+    x_drone = tf.placeholder('float', shape=[None, drone_image.shape[0], drone_image.shape[1], 3])
+    d = model.Deconv(x_drone, x_drone, x_drone, x_drone)
+    
+    predict(d, drone_image)
