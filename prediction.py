@@ -1,6 +1,7 @@
 import model
 import tensorflow as tf
 import cv2
+import numpy as np
 
 def predict(d, drone_image):
     saver = tf.train.Saver()
@@ -18,19 +19,17 @@ def predict(d, drone_image):
         
         for batch_idx in range(0, len(result)):
             print('Saving Result...')
-            cv2.imwrite('Ganghwa_p.jpg', result[batch_idx]*255)
+            cv2.imwrite('Sinjeong_p.jpg', result[batch_idx]*255)
             
     print('Image Segmentation Complete!')
 
 if __name__ == '__main__':
     print('Preparing Image...')
-    #drone_image = cv2.cvtColor(cv2.imread('drone_dataset/Ganghwa/DSC00076.JPG'), cv2.COLOR_BGR2RGB)
-    drone_image = cv2.imread('drone_dataset/Ganghwa/DSC00076.JPG')
-    drone_image = cv2.resize(drone_image, None, fx=0.0625, fy=0.0625, interpolation=cv2.INTER_AREA)
+    drone_image = np.asarray(cv2.imread('drone_dataset/x_sinjeong.png'))
     print(drone_image.shape)
-    drone_image = drone_image[0:223, 0:223]
+    drone_image = drone_image[0:224*9, 0:224*9]
     
-    cv2.imwrite('Ganghwa.jpg', drone_image)
+    cv2.imwrite('Sinjeong.png', drone_image)
     
     x_drone = tf.placeholder('float', shape=[None, drone_image.shape[0], drone_image.shape[1], 3])
     d = model.Deconv(x_drone, x_drone, x_drone, x_drone)
