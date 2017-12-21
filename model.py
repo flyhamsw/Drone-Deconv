@@ -80,16 +80,14 @@ class Deconv:
 
         self.y_conv = c.deconv_layer(self.deconv_1_1, [1, 1, 3, 32], 3, 'score_1')
         self.y_soft = tf.nn.softmax(self.y_conv)
-
+        '''
         self.cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y_, logits=self.y_conv))
         self.cross_entropy_valid = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y_, logits=self.y_conv))
+        '''
+        self.cross_entropy = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.y_, logits=self.y_conv))
+        self.cross_entropy_valid = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.y_, logits=self.y_conv))
 
         self.train_step = tf.train.AdamOptimizer(learning_rate=self.lr).minimize(self.cross_entropy)
 
-        #tf.summary.image('input x_image', self.x_image, 4)
-        #tf.summary.image('y_prediction', self.y_conv, 4)
-        #tf.summary.image('y_GT', self.y_, 4)
-        #tf.summary.image('y_pred_softmax', self.y_soft, 4)
         tf.summary.scalar('cross_entropy', self.cross_entropy)
         self.xe_valid_summary = tf.summary.scalar('cross_entropy_valid', self.cross_entropy_valid)
-        #tf.summary.scalar('learning rate', self.lr)

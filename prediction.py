@@ -19,17 +19,22 @@ def predict(d, drone_image):
         
         for batch_idx in range(0, len(result)):
             print('Saving Result...')
-            cv2.imwrite('Sinjeong_p.jpg', result[batch_idx]*255)
+            cv2.imwrite('ganghwa_crop_p.jpg', result[batch_idx]*255)
             
     print('Image Segmentation Complete!')
 
 if __name__ == '__main__':
     print('Preparing Image...')
+    '''
     drone_image = np.asarray(cv2.imread('drone_dataset/x_sinjeong.png'))
     print(drone_image.shape)
     drone_image = drone_image[0:224*9, 0:224*9]
+    print(drone_image.shape)
     
     cv2.imwrite('Sinjeong.png', drone_image)
+    '''
+    
+    drone_image = cv2.imread('ganghwa_crop.png')
     
     x_drone = tf.placeholder('float', shape=[None, drone_image.shape[0], drone_image.shape[1], 3])
     d = model.Deconv(x_drone, x_drone, x_drone, x_drone)

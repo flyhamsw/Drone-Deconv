@@ -4,6 +4,7 @@ from pipeline import input_pipeline
 import shutil
 import os
 import data
+from tqdm import tqdm
 
 TRAINING_DATASET = 'NGII_training.tfrecords'
 VALIDATION_DATASET = 'NGII_validation.tfrecords'
@@ -43,14 +44,14 @@ def train(d, batch_size, epoch):
         k = 0
 
         for i in range(0, epoch):
-            for j in range(0, steps):
+            print('epoch # %d' % i)
+            for j in tqdm(range(0, steps)):
+                sess.run(d.train_step, feed_dict={d.am_testing: False})
                 if k % 100 == 0:
                     summary, _ = sess.run([merged, d.train_step], feed_dict={d.am_testing: False})
                     train_writer.add_summary(summary, k)
                     summary, _ = sess.run([d.xe_valid_summary, d.cross_entropy_valid], feed_dict={d.am_testing: True})
                     test_writer.add_summary(summary, k)
-                else:
-                    sess.run(d.train_step, feed_dict={d.am_testing: False})
                 k = k + 1
             
         coord.request_stop()

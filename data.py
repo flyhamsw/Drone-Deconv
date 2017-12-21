@@ -1,4 +1,3 @@
-import tensorflow as tf
 import sqlite3
 import random
 import os
@@ -53,17 +52,13 @@ def insert_ngii_dataset():
     cur.close()
     conn.close()
 
-def insert_drone_dataset():
-    drone_dataset_dir = 'drone_dataset'
-
+def insert_greenbelt_patch_dir(patch_list):
     conn, cur = get_db_connection()
-    dataset_drone_names = os.listdir(drone_dataset_dir)
 
-    cur.execute('delete from drone_dir;')
+    cur.execute('delete from greenbelt_patch_dir;')
 
-    for name in dataset_drone_names:
-        drone_x_dir = '%s/%s/x.png' % (drone_dataset_dir, name)
-        cur.execute("insert into drone_dir values ('%s', '%s');" % (name, drone_x_dir))
+    for patch in patch_list:
+        cur.execute("insert into greenbelt_patch_dir values ('%s', '%s', '%s', '%s', '%s');" % (patch[0], patch[1], patch[2], patch[3], patch[4]))
 
     conn.commit()
     cur.close()
@@ -78,14 +73,14 @@ def get_steps_per_epoch(batch_size, interest_data):
     print('%d steps / epoch' % steps)
     return steps
 
-def get_steps_per_epoch_drone(batch_size):
+def get_ngii_dir(purpose):
     conn, cur = get_db_connection()
-    cur.execute("select count(*) from drone_patch_dir;")
-    rows = cur.fetchall()
-    steps = int(rows[0][0]/batch_size)
-    print('%d steps / epoch' % steps)
-    return steps
-    
+    cur.execute("select * from ngii_dir where purpose = '%s';" % purpose)
+    ngii_dir = cur.fetchall()
+    cur.close()
+    conn.close()
+    return ngii_dir
+
 def get_ngii_dir_all():
     conn, cur = get_db_connection()
     cur.execute("select * from ngii_dir;")
@@ -93,15 +88,6 @@ def get_ngii_dir_all():
     cur.close()
     conn.close()
     return ngii_dir
-    
-def get_drone_dir_all():
-    conn, cur = get_db_connection()
-    cur.execute("select * from drone_dir;")
-    ngii_dir = cur.fetchall()
-    cur.close()
-    conn.close()
-    return ngii_dir
-
 
 def get_patch_all(conn, cur, purpose):
     cur.execute("select patch_dir.x_dir, patch_dir.y_dir from patch_dir inner join ngii_dir on patch_dir.name = ngii_dir.name where ngii_dir.purpose='%s';" % purpose)
@@ -116,14 +102,13 @@ def get_patch_all(conn, cur, purpose):
         y_patch_filenames.append(row[1])
     return patch_filenames, x_patch_filenames, y_patch_filenames
     
-def get_drone_patch_all(conn, cur):
-    cur.execute("select x_dir from drone_patch_dir;")
+def get_greenbelt_patch_dir():
+    conn, cur = get_db_connection()
+    cur.execute("select * from greenbelt_patch_dir;")
     patch_dir = cur.fetchall()
-    random.shuffle(patch_dir)
-    patch_filenames = []
-    for row in patch_dir:
-        patch_filenames.append(row[0])
-    return patch_filenames        
+    cur.close()
+    conn.close()
+    return patch_dir
 
 def insert_patch(name, x_data, y_data):
     conn, cur = get_db_connection()
@@ -158,5 +143,4 @@ def insert_drone_patch(name, x_data):
     conn.close()
     
 if __name__=='__main__':
-    #insert_ngii_dataset()
-    insert_drone_dataset()
+    insert_ngii_dataset()

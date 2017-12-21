@@ -17,10 +17,10 @@ def read_and_decode(filename_queue):
     segmentation = tf.decode_raw(features['mask_raw'], tf.uint8)
 
     image = tf.reshape(image,[224,224,3])
-    segmentation = tf.reshape(segmentation,[224,224,3])
+    segmentation = tf.reshape(segmentation,[224,224])
 
     rgb = tf.cast(image, tf.float32)
-    mask = tf.cast(segmentation, tf.float32)
+    mask = tf.cast(segmentation, tf.int32)
 
     return rgb, mask
 
