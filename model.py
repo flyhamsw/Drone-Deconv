@@ -2,7 +2,7 @@ import tensorflow as tf
 import CNN as c
 
 class Deconv:
-    def __init__(self, x_batch_train, y_batch_train, x_batch_validation, y_batch_validation, lr=0.0001):
+    def __init__(self, x_batch_train, y_batch_train=None, x_batch_validation=None, y_batch_validation=None, lr=0.0001, num_of_class=3, prediction=False):
         self.lr = lr
 
         self.am_testing = tf.placeholder(dtype=bool,shape=())
@@ -12,10 +12,12 @@ class Deconv:
         self.x_batch_validation = x_batch_validation
         self.y_batch_validation = y_batch_validation
 
-        self.x_image = tf.cond(self.am_testing, lambda: self.x_batch_validation, lambda: self.x_batch_train)
-        self.y_ = tf.cond(self.am_testing, lambda: self.y_batch_validation, lambda: self.y_batch_train)
-
-        self.expected = tf.expand_dims(self.y_, -1)
+        if not prediction:
+            self.x_image = tf.cond(self.am_testing, lambda: self.x_batch_validation, lambda: self.x_batch_train)
+            self.y_ = tf.cond(self.am_testing, lambda: self.y_batch_validation, lambda: self.y_batch_train)
+            self.y_ = tf.one_hot(self.y_, num_of_class)
+        else:
+            self.x_image = self.x_batch_train
 
         self.conv_1_1 = c.conv_layer(self.x_image, [3, 3, 3, 64], 64, 'conv_1_1')
         self.conv_1_2 = c.conv_layer(self.conv_1_1, [3, 3, 64, 64], 64, 'conv_1_2')
@@ -78,16 +80,15 @@ class Deconv:
         self.deconv_1_2 = c.deconv_layer(self.unpool_1, [3, 3, 64, 64], 64, 'deconv_1_2')
         self.deconv_1_1 = c.deconv_layer(self.deconv_1_2, [3, 3, 32, 64], 32, 'deconv_1_1')
 
-        self.y_conv = c.deconv_layer(self.deconv_1_1, [1, 1, 3, 32], 3, 'score_1')
+        self.y_conv = c.deconv_layer(self.deconv_1_1, [1, 1, num_of_class, 32], num_of_class, 'score_1')
         self.y_soft = tf.nn.softmax(self.y_conv)
-        '''
-        self.cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y_, logits=self.y_conv))
-        self.cross_entropy_valid = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y_, logits=self.y_conv))
-        '''
-        self.cross_entropy = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.y_, logits=self.y_conv))
-        self.cross_entropy_valid = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.y_, logits=self.y_conv))
 
-        self.train_step = tf.train.AdamOptimizer(learning_rate=self.lr).minimize(self.cross_entropy)
+        if not prediction:
+            self.cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y_, logits=self.y_conv))
+            self.cross_entropy_valid = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.y_, logits=self.y_conv))
 
-        tf.summary.scalar('cross_entropy', self.cross_entropy)
-        self.xe_valid_summary = tf.summary.scalar('cross_entropy_valid', self.cross_entropy_valid)
+            self.train_step = tf.train.AdamOptimizer(learning_rate=self.lr).minimize(self.cross_entropy)
+
+            tf.summary.scalar('cross_entropy', self.cross_entropy)
+            tf.summary.image('Prediction', self.y_soft)
+            self.xe_valid_summary = tf.summary.scalar('cross_entropy_valid', self.cross_entropy_valid)

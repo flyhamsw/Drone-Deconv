@@ -56,12 +56,12 @@ def train(d, batch_size, epoch):
             
         coord.request_stop()
         coord.join(threads)
-        save_path = saver.save(sess, "/home/lsmjn/Drone-Deconv/trained_model/Drone_CNN.ckpt")
+        save_path = saver.save(sess, "/home/lsmjn/Drone-Deconv/trained_model/Drone_Deconv.ckpt")
         print('Model saved in file: %s' % save_path)
         train_writer.close()
 
 if __name__ == '__main__':
     x_batch_train, y_batch_train = input_pipeline(TRAINING_DATASET, BATCH_SIZE, NUM_EPOCHS)
     x_batch_validation, y_batch_validation = input_pipeline(VALIDATION_DATASET, BATCH_SIZE, NUM_EPOCHS)
-    d = model.Deconv(x_batch_train, y_batch_train, x_batch_validation, y_batch_validation)
+    d = model.Deconv(x_batch_train, y_batch_train, x_batch_validation, y_batch_validation, num_of_class=4)
     train(d, BATCH_SIZE, NUM_EPOCHS)
