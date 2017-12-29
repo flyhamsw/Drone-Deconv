@@ -3,6 +3,7 @@ import tensorflow as tf
 import cv2
 import numpy as np
 from tqdm import tqdm
+import sys
 
 PATCH_SIZE = 224 * 8
 
@@ -28,7 +29,6 @@ def prepare_patches(drone_image_dir):
 
 def predict(d, patches, width_iter, height_iter, width, height):
     otherwise_dir_list = []
-    agriculture_dir_list = []
     building_dir_list = []
     road_dir_list = []
 
@@ -47,25 +47,22 @@ def predict(d, patches, width_iter, height_iter, width, height):
 
             for batch_idx in range(0, len(result)):
                 otherwise_dir = 'segmentation_result/%d_otherwise.png' % k
-                agriculture_dir = 'segmentation_result/%d_agriculture.png' % k
                 building_dir = 'segmentation_result/%d_building.png' % k
                 road_dir = 'segmentation_result/%d_road.png' % k
 
                 otherwise_dir_list.append(otherwise_dir)
-                agriculture_dir_list.append(agriculture_dir)
                 building_dir_list.append(building_dir)
                 road_dir_list.append(road_dir)
 
                 cv2.imwrite(otherwise_dir, result[batch_idx][:, :, 0] * 255)
-                cv2.imwrite(agriculture_dir, result[batch_idx][:, :, 1] * 255)
                 cv2.imwrite(building_dir, result[batch_idx][:, :, 2] * 255)
-                cv2.imwrite(road_dir, result[batch_idx][:, :, 3] * 255)
+                cv2.imwrite(road_dir, result[batch_idx][:, :, 1] * 255)
 
             k = k + 1
 
     result_list = []
 
-    for dir_list in [otherwise_dir_list, agriculture_dir_list, building_dir_list, road_dir_list]:
+    for dir_list in [otherwise_dir_list, building_dir_list, road_dir_list]:
         k = 0
         result = np.zeros((PATCH_SIZE * width_iter, PATCH_SIZE * height_iter, 3))
         for i in range(0, width_iter):
@@ -76,14 +73,14 @@ def predict(d, patches, width_iter, height_iter, width, height):
         result_list.append(result[0:width, 0:height, :])
 
     cv2.imwrite('segmentation_result_otherwise.png', result_list[0])
-    cv2.imwrite('segmentation_result_agriculture.png', result_list[1])
-    cv2.imwrite('segmentation_result_building.png', result_list[2])
-    cv2.imwrite('segmentation_result_road.png', result_list[3])
+    cv2.imwrite('segmentation_result_building.png', result_list[1])
+    cv2.imwrite('segmentation_result_road.png', result_list[2])
 
 if __name__ == '__main__':
-    patches, width_iter, height_iter, width, height = prepare_patches('icheon_Ortho.png')
+    filename = sys.argv[1]
+    patches, width_iter, height_iter, width, height = prepare_patches(filename)
 
     x_drone = tf.placeholder(tf.float32, shape=[None, PATCH_SIZE, PATCH_SIZE, 3])
-    d = model.Deconv(x_drone, prediction=True, num_of_class=4)
+    d = model.Deconv(x_drone, prediction=True, num_of_class=3)
     
     predict(d, patches, width_iter, height_iter, width, height)

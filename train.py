@@ -9,7 +9,7 @@ from tqdm import tqdm
 TRAINING_DATASET = 'NGII_training.tfrecords'
 VALIDATION_DATASET = 'NGII_validation.tfrecords'
 BATCH_SIZE = 8
-NUM_EPOCHS = 20
+NUM_EPOCHS = 30
 
 def train(d, batch_size, epoch):
     #Set directory for tensorboard and trained model
@@ -63,5 +63,5 @@ def train(d, batch_size, epoch):
 if __name__ == '__main__':
     x_batch_train, y_batch_train = input_pipeline(TRAINING_DATASET, BATCH_SIZE, NUM_EPOCHS)
     x_batch_validation, y_batch_validation = input_pipeline(VALIDATION_DATASET, BATCH_SIZE, NUM_EPOCHS)
-    d = model.Deconv(x_batch_train, y_batch_train, x_batch_validation, y_batch_validation, num_of_class=4)
+    d = model.Deconv(x_batch_train, y_batch_train, x_batch_validation, y_batch_validation, num_of_class=3)
     train(d, BATCH_SIZE, NUM_EPOCHS)

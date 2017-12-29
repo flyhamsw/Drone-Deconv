@@ -25,7 +25,7 @@ def insert_ngii_dataset():
 
     for name in dataset_training_names:
         ngii_x_dir = '%s/%s/x.png' % (ngii_dataset_training_dir, name)
-        ngii_y_dir = '%s/%s/y.png' % (ngii_dataset_training_dir, name)
+        ngii_y_dir = '%s/%s/y_index.png' % (ngii_dataset_training_dir, name)
         try:
             cur.execute("insert into ngii_dir values ('%s', '%s', '%s', 'training');" % (name, ngii_x_dir, ngii_y_dir))
         except Exception as e:
@@ -35,7 +35,7 @@ def insert_ngii_dataset():
 
     for name in dataset_validation_names:
         ngii_x_dir = '%s/%s/x.png' % (ngii_dataset_validation_dir, name)
-        ngii_y_dir = '%s/%s/y.png' % (ngii_dataset_validation_dir, name)
+        ngii_y_dir = '%s/%s/y_index.png' % (ngii_dataset_validation_dir, name)
         try:
             cur.execute("insert into ngii_dir values ('%s', '%s', '%s', 'validation');" % (name, ngii_x_dir, ngii_y_dir))
         except Exception as e:
@@ -45,7 +45,7 @@ def insert_ngii_dataset():
 
     for name in dataset_test_names:
         ngii_x_dir = '%s/%s/x.png' % (ngii_dataset_test_dir, name)
-        ngii_y_dir = '%s/%s/y.png' % (ngii_dataset_test_dir, name)
+        ngii_y_dir = '%s/%s/y_index.png' % (ngii_dataset_test_dir, name)
         cur.execute("insert into ngii_dir values ('%s', '%s', '%s', 'test');" % (name, ngii_x_dir, ngii_y_dir))
 
     conn.commit()
