@@ -69,7 +69,7 @@ def get_steps_per_epoch(batch_size, interest_data):
     conn, cur = get_db_connection()
     cur.execute("select count(*) from patch_dir inner join ngii_dir on patch_dir.name = ngii_dir.name where ngii_dir.purpose='%s';" % interest_data)
     rows = cur.fetchall()
-    steps = int(rows[0][0]/batch_size) * 6 # Consider Data Augmentation in make_patch_drone.py. Augmented 6 times.
+    steps = int(rows[0][0]/batch_size)
     print('%d steps / epoch' % steps)
     return steps
 
@@ -92,7 +92,7 @@ def get_ngii_dir_all():
 def get_patch_all(conn, cur, purpose):
     cur.execute("select patch_dir.x_dir, patch_dir.y_dir from patch_dir inner join ngii_dir on patch_dir.name = ngii_dir.name where ngii_dir.purpose='%s';" % purpose)
     patch_dir = cur.fetchall()
-    random.shuffle(patch_dir)
+    #random.shuffle(patch_dir)
     patch_filenames = []
     x_patch_filenames = []
     y_patch_filenames = []

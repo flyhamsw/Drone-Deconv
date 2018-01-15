@@ -90,5 +90,7 @@ class Deconv:
             self.train_step = tf.train.AdamOptimizer(learning_rate=self.lr).minimize(self.cross_entropy)
 
             tf.summary.scalar('cross_entropy', self.cross_entropy)
+            tf.summary.image('x_image', self.x_image)
+            tf.summary.image('y_', self.y_)
             tf.summary.image('Prediction', self.y_soft)
             self.xe_valid_summary = tf.summary.scalar('cross_entropy_valid', self.cross_entropy_valid)

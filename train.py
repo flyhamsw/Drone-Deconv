@@ -6,10 +6,10 @@ import os
 import data
 from tqdm import tqdm
 
-TRAINING_DATASET = 'NGII_training.tfrecords'
-VALIDATION_DATASET = 'NGII_validation.tfrecords'
+TRAINING_DATASET = '/media/lsmjn/56fcc20e-a0ee-45e0-8df1-bf8b2e9a43b2/tfrecords/NGII_training.tfrecords'
+VALIDATION_DATASET = '/media/lsmjn/56fcc20e-a0ee-45e0-8df1-bf8b2e9a43b2/tfrecords/NGII_validation.tfrecords'
 BATCH_SIZE = 8
-NUM_EPOCHS = 30
+NUM_EPOCHS = 15
 
 def train(d, batch_size, epoch):
     #Set directory for tensorboard and trained model
