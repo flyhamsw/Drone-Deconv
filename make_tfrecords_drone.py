@@ -32,7 +32,9 @@ def build_tfrecords(target_dataset, augment_op=False):
 
     for img_path, annotation_path in tqdm(filename_pairs):
         img = cv2.imread(img_path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         annotation = cv2.imread(annotation_path)
+        annotation = cv2.cvtColor(annotation, cv2.COLOR_BGR2RGB)
 
         if augment_op:
             augmented_img_list = augment_image(img, sess)
@@ -61,5 +63,4 @@ def build_tfrecords(target_dataset, augment_op=False):
 if __name__ == '__main__':
     build_tfrecords('training')
     build_tfrecords('validation')
-    build_tfrecords('test')
 

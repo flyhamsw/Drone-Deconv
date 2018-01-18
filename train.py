@@ -9,12 +9,13 @@ from tqdm import tqdm
 TRAINING_DATASET = '/media/lsmjn/56fcc20e-a0ee-45e0-8df1-bf8b2e9a43b2/tfrecords/NGII_training.tfrecords'
 VALIDATION_DATASET = '/media/lsmjn/56fcc20e-a0ee-45e0-8df1-bf8b2e9a43b2/tfrecords/NGII_validation.tfrecords'
 BATCH_SIZE = 8
-NUM_EPOCHS = 15
+NUM_EPOCHS = 20
 
 def train(d, batch_size, epoch):
     #Set directory for tensorboard and trained model
     TB_DIR = '/home/lsmjn/Drone-Deconv/tb'
     TRAINED_MODEL_DIR = 'trained_model'
+    '''
     try:
         shutil.rmtree(TB_DIR)
         shutil.rmtree(TRAINED_MODEL_DIR)
@@ -22,6 +23,7 @@ def train(d, batch_size, epoch):
         print(e)
     os.makedirs(TB_DIR)
     os.makedirs(TRAINED_MODEL_DIR)
+    '''
 
     #Set saver and merge
     saver = tf.train.Saver()

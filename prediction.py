@@ -10,6 +10,7 @@ PATCH_SIZE = 224 * 8
 def prepare_patches(drone_image_dir):
     patches = []
     drone_image = cv2.imread(drone_image_dir)
+    drone_image = cv2.cvtColor(drone_image, cv2.COLOR_BGR2RGB)
 
     width = drone_image.shape[0]
     height = drone_image.shape[1]
@@ -55,8 +56,8 @@ def predict(d, patches, width_iter, height_iter, width, height):
                 road_dir_list.append(road_dir)
 
                 cv2.imwrite(otherwise_dir, result[batch_idx][:, :, 0] * 255)
-                cv2.imwrite(building_dir, result[batch_idx][:, :, 2] * 255)
                 cv2.imwrite(road_dir, result[batch_idx][:, :, 1] * 255)
+                cv2.imwrite(building_dir, result[batch_idx][:, :, 2] * 255)
 
             k = k + 1
 
@@ -77,7 +78,8 @@ def predict(d, patches, width_iter, height_iter, width, height):
     cv2.imwrite('segmentation_result_road.png', result_list[2])
 
 if __name__ == '__main__':
-    filename = sys.argv[1]
+    #filename = sys.argv[1]
+    filename = 'gangnam_x.png'
     patches, width_iter, height_iter, width, height = prepare_patches(filename)
 
     x_drone = tf.placeholder(tf.float32, shape=[None, PATCH_SIZE, PATCH_SIZE, 3])

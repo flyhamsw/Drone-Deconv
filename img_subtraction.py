@@ -3,30 +3,25 @@ import numpy as np
 
 kernels = []
 
-kernels.append(np.ones((3, 3), np.uint8))
-kernels.append(np.ones((5, 5), np.uint8))
-kernels.append(np.ones((7, 7), np.uint8))
-
-def img_subtraction(p_dir, y_dir, interest_ch=2):
-    p = np.array(cv2.imread(p_dir), dtype=float)[:,:,interest_ch] / 255
-    y = np.array(cv2.imread(y_dir), dtype=float)[:,:,interest_ch]
+#interest_ch: 0-building
+def img_subtraction(p_dir, y_dir, interest_ch=0, threshold=0.75):
+    p = cv2.imread(p_dir)[:,:,interest_ch] > threshold * 255
+    p = np.array(p, dtype=float) * 255
+    y = np.array(cv2.imread(y_dir), dtype=float)[:,:,interest_ch] * 255
 
     subtraction = p - y
 
-    cv2.imwrite('p.png', p * 225)
-    cv2.imwrite('y.png', y)
+    cv2.imwrite('subtraction/p.png', p)
+    cv2.imwrite('subtraction/subtraction.png', subtraction)
+    cv2.imwrite('subtraction/y.png', y)
 
     i = 0
-
-    print(p.shape)
-    print(y.shape)
-
     for kernel in kernels:
-        opening = cv2.dilate(cv2.erode(subtraction, kernel, iterations=1), kernel, iterations=1) * 255
-        cv2.imwrite(str(i) + '.png', opening)
+        opening = cv2.dilate(cv2.erode(subtraction, kernel, iterations=1), kernel, iterations=1)
+        cv2.imwrite('subtraction/%d.png' % i, opening)
         i = i + 1
 
-    return subtraction
-
 if __name__ == '__main__':
-    img_subtraction('segmentation_result_building.png', 'yeosu_y.png')
+    for i in range(3, 20, 2):
+        kernels.append(np.ones((i, i), np.uint8))
+    img_subtraction('segmentation_result_building.png', 'gangnam_y.png')
